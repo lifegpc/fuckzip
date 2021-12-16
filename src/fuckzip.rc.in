@@ -1,0 +1,35 @@
+#include <winver.h>
+#ifndef DEBUG
+#define VER_DEBUG 0
+#else
+#define VER_DEBUG VS_FF_DEBUG
+#endif
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     @FUCKZIP_VERSION_MAJOR@,@FUCKZIP_VERSION_MINOR@,@FUCKZIP_VERSION_MICRO@,@FUCKZIP_VERSION_REV@
+PRODUCTVERSION  @FUCKZIP_VERSION_MAJOR@,@FUCKZIP_VERSION_MINOR@,@FUCKZIP_VERSION_MICRO@,@FUCKZIP_VERSION_REV@
+FILEFLAGSMASK   VS_FF_DEBUG
+FILEFLAGS       VER_DEBUG
+FILEOS          VOS__WINDOWS32
+FILETYPE        VFT_DLL
+FILESUBTYPE     VFT2_UNKNOWN
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "04090000"
+        BEGIN
+            VALUE "CompanyName",      "lifegpc\0"
+            VALUE "FileDescription",  "A tool that extract zip archive with a custom encoding\0"
+            VALUE "FileVersion",      "@FUCKZIP_VERSION@\0"
+            VALUE "InternalName",     "fuckzip\0"
+            VALUE "LegalCopyright",   "Copyright (C) 2021  lifegpc\0"
+            VALUE "OriginalFilename", "fuckzip.exe\0"
+            VALUE "ProductName",      "fuckzip\0"
+            VALUE "ProductVersion",   "@FUCKZIP_VERSION@\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 0
+    END
+END
