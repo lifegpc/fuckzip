@@ -15,15 +15,15 @@
 #endif
 
 #ifndef _O_BINARY
-#define _O_BINARY 0
+#define _O_BINARY 0x8000
 #endif
 
 #ifndef _SH_DENYWR
-#define _SH_DENYWR 0
+#define _SH_DENYWR 0x20
 #endif
 
 #ifndef _S_IWRITE
-#define _S_IWRITE 0
+#define _S_IWRITE 0x80
 #endif
 
 bool extract_zip(zip_t* zip, std::string directory, int cp) {
@@ -73,6 +73,11 @@ bool extract_zip(zip_t* zip, std::string directory, int cp) {
 #endif
             bool re;
             if (!fileop::isdir(tmp, re)) {
+                std::string errmsg;
+                if (!err::get_errno_message(errmsg, errno)) {
+                    errmsg = "Unknown error";
+                }
+                printf("Can not detect \"%s\" is a directory: %s.\n", tmp.c_str(), errmsg.c_str());
                 return false;
             }
             if (!re) {
