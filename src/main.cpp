@@ -10,6 +10,7 @@
 #include "cstr_util.h"
 #include "zip.h"
 #include "extract_zip.h"
+#include "encoding.h"
 
 #if _WIN32
 #include "Windows.h"
@@ -32,7 +33,12 @@ Options:\n\
 #if _WIN32
     printf("\
     -c <num>, --codepage <num>\n\
-                        Specify the code page of the archive.\n");
+                        Specify the code page of the archive. Can not combined with -e.\n");
+#endif
+#if HAVE_ICONV || _WIN32
+    printf("\
+    -e <encoding>, --encoding <encoding>\n\
+                        Specify the encoding of the archive.\n");
 #endif
 }
 
@@ -60,6 +66,9 @@ int main(int argc, char* argv[]) {
 #if _WIN32
         {"codepage", 1, nullptr, 'c'},
 #endif
+#if HAVE_ICONV || _WIN32
+        {"encoding", 1, nullptr, 'e'},
+#endif
         nullptr,
     };
     int c;
@@ -67,8 +76,12 @@ int main(int argc, char* argv[]) {
 #if _WIN32
     shortopts += "c:";
 #endif
+#if HAVE_ICONV || _WIN32
+    shortopts += "e:";
+#endif
     std::string input;
     int cp = -1;
+    std::string enc;
     while ((c = getopt_long(argc, argv, shortopts.c_str(), opts, nullptr)) != -1) {
         switch (c) {
         case 'h':
@@ -89,6 +102,11 @@ int main(int argc, char* argv[]) {
                 if (have_wargv) wchar_util::freeArgv(wargv, wargc);
                 return 1;
             }
+            break;
+#endif
+#if HAVE_ICONV || _WIN32
+        case 'e':
+            enc = optarg;
             break;
 #endif
         case 1:
@@ -113,6 +131,10 @@ int main(int argc, char* argv[]) {
 #if _WIN32
     if (have_wargv) wchar_util::freeArgv(wargv, wargc);
 #endif
+    if (cp != -1 && enc.length()) {
+        printf("Error: Both codepage and encoding specified.\n");
+        return 1;
+    }
     int err;
     int flags = ZIP_FL_ENC_UTF_8;
 #if _WIN32
@@ -128,7 +150,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     int result = 0;
-    if (!extract_zip(zip, "", cp)) {
+    if (!extract_zip(zip, "", cp, enc)) {
         goto end;
     }
 end:

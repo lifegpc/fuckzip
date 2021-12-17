@@ -24,6 +24,7 @@ endif()
 set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/fuckzip_version.h" PROPERTIES GENERATED TRUE)
 
 include_directories("${CMAKE_CURRENT_BINARY_DIR}")
+include_directories("${CMAKE_BINARY_DIR}/utils")
 
 add_custom_target(fuckzip-version ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_SOURCE_DIR}/FUCKZIP_VERSION.cmake")
 add_executable(fuckzip "${FUCKZIP_FILES}")

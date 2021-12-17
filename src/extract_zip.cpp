@@ -4,6 +4,7 @@
 #include "fileop.h"
 #include "malloc.h"
 #include "wchar_util.h"
+#include "encoding.h"
 
 #include <fcntl.h>
 #if _WIN32
@@ -26,7 +27,7 @@
 #define _S_IWRITE 0x80
 #endif
 
-bool extract_zip(zip_t* zip, std::string directory, int cp) {
+bool extract_zip(zip_t* zip, std::string directory, int cp, std::string enc) {
     if (!zip) return false;
     int file_mode = 0;
 #if !_WIN32
@@ -40,7 +41,7 @@ bool extract_zip(zip_t* zip, std::string directory, int cp) {
     if (num == 0) return true;
     zip_int64_t i = 0;
     zip_flags_t flags = 0;
-    if (cp != -1) flags |= ZIP_FL_ENC_RAW; else flags |= ZIP_FL_ENC_GUESS;
+    if (cp != -1 || enc.length()) flags |= ZIP_FL_ENC_RAW; else flags |= ZIP_FL_ENC_GUESS;
     for (; i < num; i++) {
         zip_stat_t stats;
         if (zip_stat_index(zip, i, flags, &stats)) {
@@ -60,6 +61,16 @@ bool extract_zip(zip_t* zip, std::string directory, int cp) {
                 printf("Can not convert name to UTF-8.\n");
                 return false;
             }
+        }
+#endif
+#if HAVE_ICONV || _WIN32
+        if (enc.length()) {
+            std::string re;
+            if (!encoding::convert(name, re, enc, "UTF-8")) {
+                printf("Can not convert name from %s to UTF-8.\n", enc.c_str());
+                return false;
+            }
+            name = re;
         }
 #endif
         std::string filepath = fileop::join(directory, name);
@@ -158,6 +169,16 @@ bool extract_zip(zip_t* zip, std::string directory, int cp) {
                 printf("Can not convert name to UTF-8.\n");
                 return false;
             }
+        }
+#endif
+#if HAVE_ICONV || _WIN32
+        if (enc.length()) {
+            std::string re;
+            if (!encoding::convert(name, re, enc, "UTF-8")) {
+                printf("Can not convert name from %s to UTF-8.\n", enc.c_str());
+                return false;
+            }
+            name = re;
         }
 #endif
         std::string filepath = fileop::join(directory, name);
